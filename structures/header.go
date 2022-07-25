@@ -3,7 +3,7 @@ package structures
 import (
 	"bytes"
 	"encoding/binary"
-	"errors"
+	"unsafe"
 )
 
 type Header struct {
@@ -12,13 +12,16 @@ type Header struct {
 	RequestId  int32
 }
 
+func (h Header) GetSizeOfBytes() int {
+	return int(unsafe.Sizeof(h.SvcId)) * 3
+}
+
 func (h *Header) Encode() ([]byte, error) {
 	data := new(bytes.Buffer)
 
 	err := binary.Write(data, binary.LittleEndian, h)
 	if err != nil {
-		// TODO: Make separate error
-		return nil, errors.New("Invalid encoding of header")
+		return nil, &InvalidEncodingError{"header"}
 	}
 
 	return data.Bytes(), nil
@@ -29,8 +32,7 @@ func (h *Header) Decode(data []byte) error {
 
 	err := binary.Read(buffer, binary.LittleEndian, h)
 	if err != nil {
-		// TODO: Make separate error
-		return errors.New("Invalid decoding of header")
+		return &InvalidDecodingError{"header"}
 	}
 
 	return nil
