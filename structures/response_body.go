@@ -11,7 +11,6 @@ type ResponseBody interface {
 	Decode(data []byte) error
 }
 
-// ResponseError when return_code != 0, otherwise Ok
 type ReturnCode int32
 
 type SvcOkResponseBody struct {

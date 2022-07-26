@@ -3,7 +3,6 @@ package structures
 import (
 	"bytes"
 	"encoding/binary"
-	"errors"
 )
 
 type SvcRequestBody struct {
@@ -22,12 +21,12 @@ func (b *SvcRequestBody) Encode() ([]byte, error) {
 
 	tokenBytes, err := b.Token.Encode()
 	if err != nil {
-		return nil, &InvalidEncodingError{"scope"}
+		return nil, &InvalidEncodingError{"token"}
 	}
 
 	err = binary.Write(data, binary.LittleEndian, tokenBytes)
 	if err != nil {
-		return nil, &InvalidEncodingError{"scope"}
+		return nil, &InvalidEncodingError{"token"}
 	}
 
 	scopeBytes, err := b.Scope.Encode()
@@ -46,14 +45,9 @@ func (b *SvcRequestBody) Encode() ([]byte, error) {
 func (b *SvcRequestBody) Decode(data []byte) error {
 	buffer := bytes.NewBuffer(data)
 
-	err := binary.Read(buffer, binary.LittleEndian, b.SvcMsg)
+	err := binary.Read(buffer, binary.LittleEndian, &b.SvcMsg)
 	if err != nil {
 		return &InvalidDecodingError{"svc_msg"}
-	}
-
-	err = binary.Read(buffer, binary.LittleEndian, b.Token)
-	if err != nil {
-		return errors.New("invalid read bytes of token")
 	}
 
 	err = b.Token.Decode(buffer.Bytes())
@@ -69,4 +63,20 @@ func (b *SvcRequestBody) Decode(data []byte) error {
 	}
 
 	return nil
+}
+
+func (b *SvcRequestBody) Equal(body *SvcRequestBody) bool {
+	if b.SvcMsg != body.SvcMsg {
+		return false
+	}
+
+	if !b.Token.Equal(&body.Token) {
+		return false
+	}
+
+	if !b.Scope.Equal(&body.Scope) {
+		return false
+	}
+
+	return true
 }

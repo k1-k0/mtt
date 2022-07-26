@@ -78,3 +78,17 @@ func (s String) String() string {
 
 	return builder.String()
 }
+
+func (s *String) Equal(str *String) bool {
+	if (len(s.Str) != len(str.Str)) || (s.Length != str.Length) {
+		return false
+	}
+
+	for i := range s.Str {
+		if s.Str[i] != str.Str[i] {
+			return false
+		}
+	}
+
+	return true
+}

@@ -37,3 +37,8 @@ func (h *Header) Decode(data []byte) error {
 
 	return nil
 }
+
+func (h *Header) Equal(header *Header) bool {
+	result := (h.SvcId == header.SvcId) && (h.BodyLength == header.BodyLength) && (h.RequestId == header.RequestId)
+	return result
+}
