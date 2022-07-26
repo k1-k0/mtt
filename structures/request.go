@@ -37,11 +37,6 @@ func (r *Request) BuildRequest(token, scope string) ([]byte, error) {
 		return nil, &InvalidEncodingError{"request body"}
 	}
 
-	err = binary.Write(data, binary.LittleEndian, bodyData)
-	if err != nil {
-		return nil, &InvalidEncodingError{"request body"}
-	}
-
 	r.Header = Header{
 		SvcId:      SVC_ID,
 		BodyLength: int32(len(bodyData)),
@@ -56,6 +51,11 @@ func (r *Request) BuildRequest(token, scope string) ([]byte, error) {
 	err = binary.Write(data, binary.LittleEndian, headerData)
 	if err != nil {
 		return nil, &InvalidEncodingError{"request header"}
+	}
+
+	err = binary.Write(data, binary.LittleEndian, bodyData)
+	if err != nil {
+		return nil, &InvalidEncodingError{"request body"}
 	}
 
 	return data.Bytes(), nil

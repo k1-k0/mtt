@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"unsafe"
 )
 
 type ResponseBody interface {
@@ -24,6 +25,10 @@ type SvcOkResponseBody struct {
 type SvcErrorResponseBody struct {
 	Code        ReturnCode
 	ErrorString String
+}
+
+func (r *ReturnCode) GetSizeOfBytes() int {
+	return int(unsafe.Sizeof(*r))
 }
 
 func (r *ReturnCode) Encode() ([]byte, error) {
@@ -58,7 +63,7 @@ func (b *SvcOkResponseBody) Encode() ([]byte, error) {
 
 	err = binary.Write(data, binary.LittleEndian, clientIdData)
 	if err != nil {
-		return nil, &InvalidEncodingError{"client_type"}
+		return nil, &InvalidEncodingError{"client_id"}
 	}
 
 	err = binary.Write(data, binary.LittleEndian, b.ClientType)

@@ -82,6 +82,8 @@ func (r *Response) Decode(data []byte) error {
 		return &InvalidDecodingError{"return_code"}
 	}
 
+	buffer.Next(r.Code.GetSizeOfBytes())
+
 	if r.Code == CODE_OK {
 		r.Body = &SvcOkResponseBody{}
 	} else {
