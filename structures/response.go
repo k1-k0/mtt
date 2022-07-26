@@ -103,3 +103,26 @@ func (r *Response) String() string {
 		return r.Body.(*SvcErrorResponseBody).String()
 	}
 }
+
+func (r *Response) Equal(body *Response) bool {
+	if !r.Header.Equal(&body.Header) {
+		return false
+	}
+
+	if r.Code != body.Code {
+		return false
+	}
+
+	switch bd := r.Body.(type) {
+	case *SvcOkResponseBody:
+		if !r.Body.(*SvcOkResponseBody).Equal(bd) {
+			return false
+		}
+	case *SvcErrorResponseBody:
+		if !r.Body.(*SvcErrorResponseBody).Equal(bd) {
+			return false
+		}
+	}
+
+	return true
+}
