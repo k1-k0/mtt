@@ -3,10 +3,7 @@ package structures
 import (
 	"bytes"
 	"encoding/binary"
-)
-
-const (
-	OK_CODE = 0
+	"fmt"
 )
 
 type ResponseBody interface {
@@ -15,7 +12,7 @@ type ResponseBody interface {
 }
 
 // ResponseError when return_code != 0, otherwise Ok
-type ResponseReturnCode int32
+type ReturnCode int32
 
 type SvcOkResponseBody struct {
 	ClientId   String
@@ -26,10 +23,11 @@ type SvcOkResponseBody struct {
 }
 
 type SvcErrorResponseBody struct {
+	Code        ReturnCode
 	ErrorString String
 }
 
-func (r *ResponseReturnCode) Encode() ([]byte, error) {
+func (r *ReturnCode) Encode() ([]byte, error) {
 	data := new(bytes.Buffer)
 
 	err := binary.Write(data, binary.LittleEndian, r)
@@ -40,7 +38,7 @@ func (r *ResponseReturnCode) Encode() ([]byte, error) {
 	return data.Bytes(), nil
 }
 
-func (r *ResponseReturnCode) Decode(data []byte) error {
+func (r *ReturnCode) Decode(data []byte) error {
 	buffer := bytes.NewBuffer(data)
 
 	err := binary.Read(buffer, binary.LittleEndian, r)
@@ -127,6 +125,11 @@ func (b *SvcOkResponseBody) Decode(data []byte) error {
 	return nil
 }
 
+func (b SvcOkResponseBody) String() string {
+	format := "client_id: %s\nclient_type: %d\nexpires_in: %d\nuser_id: %d\nusename: %s\n"
+	return fmt.Sprintf(format, b.ClientId, b.ClientType, b.ExpiresIn, b.UserId, b.Username)
+}
+
 func (b *SvcErrorResponseBody) Encode() ([]byte, error) {
 	data := new(bytes.Buffer)
 
@@ -147,4 +150,9 @@ func (b *SvcErrorResponseBody) Decode(data []byte) error {
 	}
 
 	return nil
+}
+
+func (b SvcErrorResponseBody) String() string {
+	format := "error: %s\nmessage: %s\n"
+	return fmt.Sprintf(format, codeInfo[int(b.Code)], b.ErrorString)
 }

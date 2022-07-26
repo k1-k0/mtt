@@ -5,10 +5,30 @@ import (
 	"encoding/binary"
 )
 
+const (
+	CODE_OK              = 0x00000000
+	CODE_TOKEN_NOT_FOUND = 0x00000001
+	CODE_DB_ERROR        = 0x00000002
+	CODE_UNKNOWN_MSG     = 0x00000003
+	CODE_BAD_PACKET      = 0x00000004
+	CODE_BAD_CLIENT      = 0x00000005
+	CODE_BAD_SCOPE       = 0x00000006
+)
+
+var codeInfo = map[int]string{
+	CODE_OK:              "CUBE_OAUTH2_ERR_OK",
+	CODE_TOKEN_NOT_FOUND: "CUBE_OAUTH2_ERR_TOKEN_NOT_FOUND",
+	CODE_DB_ERROR:        "CUBE_OAUTH2_ERR_DB_ERROR",
+	CODE_UNKNOWN_MSG:     "CUBE_OAUTH2_ERR_UNKNOWN_MSG",
+	CODE_BAD_PACKET:      "CUBE_OAUTH2_ERR_BAD_PACKET",
+	CODE_BAD_CLIENT:      "CUBE_OAUTH2_ERR_BAD_CLIENT",
+	CODE_BAD_SCOPE:       "CUBE_OAUTH2_ERR_BAD_SCOPE",
+}
+
 type Response struct {
-	Header     Header
-	ReturnCode ResponseReturnCode
-	Body       ResponseBody
+	Header Header
+	Code   ReturnCode
+	Body   ResponseBody
 }
 
 func (r *Response) Encode() ([]byte, error) {
@@ -24,7 +44,7 @@ func (r *Response) Encode() ([]byte, error) {
 		return nil, &InvalidEncodingError{"header"}
 	}
 
-	returnCodeData, err := r.ReturnCode.Encode()
+	returnCodeData, err := r.Code.Encode()
 	if err != nil {
 		return nil, &InvalidEncodingError{"return_code"}
 	}
@@ -57,15 +77,15 @@ func (r *Response) Decode(data []byte) error {
 
 	buffer.Next(r.Header.GetSizeOfBytes())
 
-	err = r.ReturnCode.Decode(buffer.Bytes())
+	err = r.Code.Decode(buffer.Bytes())
 	if err != nil {
 		return &InvalidDecodingError{"return_code"}
 	}
 
-	if r.ReturnCode == OK_CODE {
+	if r.Code == CODE_OK {
 		r.Body = &SvcOkResponseBody{}
 	} else {
-		r.Body = &SvcErrorResponseBody{}
+		r.Body = &SvcErrorResponseBody{Code: r.Code}
 	}
 
 	err = r.Body.Decode(buffer.Bytes())
@@ -74,4 +94,12 @@ func (r *Response) Decode(data []byte) error {
 	}
 
 	return nil
+}
+
+func (r *Response) String() string {
+	if r.Code == CODE_OK {
+		return r.Body.(*SvcOkResponseBody).String()
+	} else {
+		return r.Body.(*SvcErrorResponseBody).String()
+	}
 }
