@@ -56,6 +56,15 @@ func (s *String) Decode(data []byte) error {
 	return nil
 }
 
+func (s *String) FromString(str string) {
+	s.Length = int32(len(str))
+	s.Str = make([]int8, 0, s.Length)
+
+	for _, ch := range str {
+		s.Str = append(s.Str, int8(ch))
+	}
+}
+
 func (s String) String() string {
 	builder := new(strings.Builder)
 
