@@ -1,12 +1,19 @@
 package tools
 
 import (
-	"bufio"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net"
 	"strings"
 )
+
+type Connection interface {
+	Connect() error
+	Send(data []byte) error
+	Get() ([]byte, error)
+	Close() (err error)
+}
 
 type TCPConnection struct {
 	Host string
@@ -36,8 +43,7 @@ func (c *TCPConnection) Send(data []byte) error {
 }
 
 func (c *TCPConnection) Get() ([]byte, error) {
-	reader := bufio.NewReader(c.conn)
-	bytes, err := reader.ReadBytes('\n')
+	bytes, err := ioutil.ReadAll(c.conn)
 
 	if err != nil {
 		return nil, errors.New("failure read data")

@@ -16,13 +16,15 @@ func main() {
 		os.Exit(2)
 	}
 
-	connection := tools.TCPConnection{Host: argParser.Host, Port: argParser.Port}
+	connection := &tools.TCPConnection{Host: argParser.Host, Port: argParser.Port}
 	checker := checker.Checker{}
 	checker.Init(connection)
 
-	err = checker.CheckToken(argParser.Token, argParser.Scope)
+	resp, err := checker.CheckToken(argParser.Token, argParser.Scope)
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(2)
 	}
+
+	fmt.Println(resp)
 }
