@@ -12,10 +12,6 @@ make test
 
 To run application:
 ```bash
-make run <host> <port> <token> <scope>
-
-# Or
-
 ./build/mtt <host> <port> <token> <scope>
 ```
 

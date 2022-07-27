@@ -10,9 +10,6 @@ build:
 test:
 	go test -v -cover ./...
  
-run:
-	./${BUILD_DIR}/${BINARY_NAME}
- 
 clean:
 	go clean
 	rm -rf ${BUILD_DIR}
