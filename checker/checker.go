@@ -1,8 +1,6 @@
 package checker
 
 import (
-	"fmt"
-	"io"
 	"mtt/structures"
 	"mtt/tools"
 )
@@ -45,8 +43,4 @@ func (c *Checker) CheckToken(token, scope string) (string, error) {
 	}
 
 	return response.String(), nil
-}
-
-func (c *Checker) PrintResult(writer io.Writer, response *structures.Response) {
-	fmt.Fprintln(writer, response.String())
 }
